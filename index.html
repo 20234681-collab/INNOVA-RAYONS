@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="logo-startup.jpg">
+<style>html{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Hub Innova Rayons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: banda azul de marca con pestañas; cada área es una vista con su propio encabezado corto */
+:root{
+  --navy:#0d2280; --navy-2:#16309e; --orange:#f7931e; --orange-ink:#b85f00;
+  --bg:#f4f6fc; --surface:#ffffff; --fg:#141a33; --muted:#59617f; --line:#dde2f0;
+  --chip:#eaeefa; --ok:#1d8a52; --ok-bg:#e3f5ea;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a1030; --surface:#121a45; --fg:#eef1ff; --muted:#a3abd1; --line:#26306a;
+  --chip:#1b2560; --orange-ink:#ffae52; --ok:#5fd394; --ok-bg:#103a28; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1030; --surface:#121a45; --fg:#eef1ff; --muted:#a3abd1; --line:#26306a;
+  --chip:#1b2560; --orange-ink:#ffae52; --ok:#5fd394; --ok-bg:#103a28; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--navy);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.bar{display:flex;align-items:center;gap:20px;padding-block:12px;flex-wrap:wrap}
+.bar img{height:44px;width:auto;display:block}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{font:600 15px var(--body);color:#c9d2ff;background:none;border:0;padding:10px 16px;border-radius:999px;cursor:pointer}
+nav button:hover{color:#fff;background:var(--navy-2)}
+nav button[aria-selected="true"]{background:#fff;color:var(--navy)}
+nav button:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.pill-prog{display:inline-flex;align-items:center;gap:8px}
+.pill-prog b{font:800 12px var(--display);background:var(--orange);color:var(--navy);padding:2px 8px;border-radius:999px}
+.hero{background:linear-gradient(180deg,var(--navy) 0,var(--navy-2) 100%);color:#fff}
+.hero .wrap{padding-block:36px 40px;display:flex;gap:32px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.eyebrow{font:800 12px var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+h1{font:900 clamp(32px,5vw,52px)/1.02 var(--display);margin:8px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+.hero p{max-width:56ch;margin:0;color:#d6dcff}
+.hero img{width:200px;max-width:100%;border-radius:14px}
+main .wrap{padding-block:32px 64px}
+.note{display:flex;gap:10px;align-items:flex-start;border:1px dashed var(--orange);border-radius:12px;padding:12px 16px;color:var(--muted);font-size:14px;margin-bottom:24px}
+.note strong{color:var(--orange-ink)}
+h2{font:800 22px var(--display);margin:32px 0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.chip{font:600 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.chip span{font-size:12px;background:var(--chip);border-radius:999px;padding:0 7px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chip[aria-pressed="true"] span{background:var(--orange);color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{font:700 17px/1.25 var(--display);margin:0}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.tag{font:600 12px var(--body);background:var(--chip);color:var(--muted);padding:3px 9px;border-radius:6px}
+.tag.st{background:var(--orange);color:var(--navy)}
+.kind{font:800 11px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--orange-ink)}
+/* calendario */
+.timeline{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
+th{font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+/* progreso */
+.prog-top{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px}
+.ring{width:150px;height:150px;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;font:900 34px var(--display)}
+.ring .v small{display:block;font:600 12px var(--body);color:var(--muted);text-align:center}
+.steps{display:grid;gap:10px}
+.step{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer}
+.step input{width:22px;height:22px;accent-color:var(--orange);cursor:pointer}
+.step h3{font:700 16px var(--display);margin:0}
+.step p{margin:0;font-size:14px;color:var(--muted)}
+.step.done{background:var(--ok-bg);border-color:transparent}
+.step.done h3{color:var(--ok)}
+.when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.btn{font:600 14px var(--body);background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;margin-top:14px}
+.dl{display:block;text-align:center;text-decoration:none;color:var(--navy);background:var(--orange);border-color:var(--orange);font-weight:700;margin-top:10px}
+.dl:hover{filter:brightness(1.06)}
+.soon{align-self:flex-start;margin-top:10px}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{padding-block:20px}
+@media (max-width:640px){
+  .bar img{height:36px} nav{margin-left:0;width:100%} nav button{padding:8px 12px;font-size:14px}
+  .prog-top{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .hero img{display:none}
+  .step{grid-template-columns:auto 1fr}.step .when{grid-column:2}
+}
+@media (prefers-reduced-motion:no-preference){ .ring circle{transition:stroke-dashoffset .5s ease} }
+</style>
+</head><body>
+
+<header>
+  <div class="wrap bar">
+    <img src="logo-innova.png" alt="Innova Rayons · Centro de Emprendimiento">
+    <nav role="tablist" aria-label="Secciones del hub">
+      <button role="tab" id="t-recursos" data-v="recursos" aria-selected="true">Recursos</button>
+      <button role="tab" id="t-proyectos" data-v="proyectos" aria-selected="false">Proyectos</button>
+      <button role="tab" id="t-progreso" data-v="progreso" aria-selected="false"><span class="pill-prog">Mi progreso <b id="navPct">0%</b></span></button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero"><div class="wrap">
+  <div>
+    <div class="eyebrow" id="hEye">Startup School 2026 · Aprende y Emprende</div>
+    <h1 id="hTitle">Todo lo que tu equipo necesita para llegar al pitch</h1>
+    <p id="hText">Guías, plantillas y el calendario de las 6 sesiones de Design Thinking, del 2 al 18 de noviembre.</p>
+  </div>
+  <img src="logo-startup.jpg" alt="Logo Startup School 2026">
+</div></section>
+
+<main><div class="wrap">
+
+  <!-- RECURSOS -->
+  <section id="v-recursos" role="tabpanel" aria-labelledby="t-recursos">
+    <div class="chips" id="resFilter"></div>
+    <div class="grid" id="resGrid"></div>
+    <h2>Calendario del programa</h2>
+    <div class="timeline"><table>
+      <thead><tr><th>Fecha</th><th>Sesión</th><th>Mentor</th></tr></thead>
+      <tbody id="calBody"></tbody>
+    </table></div>
+  </section>
+
+  <!-- PROYECTOS -->
+  <section id="v-proyectos" role="tabpanel" aria-labelledby="t-proyectos" hidden>
+    <div class="note"><span>ⓘ</span><div><strong>Contenido de demostración.</strong> Los equipos y proyectos de esta sección son ficticios. Aquí aparecerán los proyectos reales de los 10 equipos del concurso.</div></div>
+    <div class="chips" id="projFilter"></div>
+    <div class="grid" id="projGrid"></div>
+  </section>
+
+  <!-- MI PROGRESO -->
+  <section id="v-progreso" role="tabpanel" aria-labelledby="t-progreso" hidden>
+    <div class="prog-top">
+      <div class="ring">
+        <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--chip)" stroke-width="12"/><circle id="ringArc" cx="60" cy="60" r="52" fill="none" stroke="var(--orange)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
+        <div class="v"><div><span id="ringPct">0%</span><small id="ringSub">0 de 9</small></div></div>
+      </div>
+      <div>
+        <div class="eyebrow">Tu ruta al pitch</div>
+        <h2 style="margin:6px 0 8px" id="progMsg">Empieza por Empatizar</h2>
+        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda solo en este navegador.</p>
+      </div>
+    </div>
+    <h2>Etapas</h2>
+    <div class="steps" id="steps"></div>
+    <button class="btn" id="reset" type="button">Reiniciar progreso</button>
+  </section>
+
+</div></main>
+
+<footer><div class="wrap">Innova Rayons – Centro de Emprendimiento · Startup School 2026, primera edición</div></footer>
+
+<script>
+const SESSIONS=[
+  {d:"2 nov",s:"Empatizar",m:"Karol Boza Salas"},
+  {d:"4 nov",s:"Definir",m:"Luz A. Herrera"},
+  {d:"9 nov",s:"Idear",m:"Mate Valencia"},
+  {d:"11 nov",s:"Prototipar",m:"Cristhian Valle"},
+  {d:"16 nov",s:"Modelo de Negocio",m:"Diego Rodríguez"},
+  {d:"18 nov",s:"Pitch",m:"Por confirmar"},
+  {d:"21 nov",s:"Presentación final ante el jurado",m:"Jurado del concurso"}
+];
+const RES=[
+  {k:"Guía",st:"Empatizar",t:"Cómo entrevistar a tus usuarios",p:"Preguntas abiertas, qué observar y cómo anotar lo que escuchas.",f:"PDF · 3 págs",u:"recursos/guia-como-entrevistar-a-tus-usuarios.pdf"},
+  {k:"Plantilla",st:"Empatizar",t:"Mapa de empatía",p:"Qué piensa, siente, dice y hace tu usuario, en una sola hoja.",f:"Plantilla editable · Word",u:"recursos/mapa-de-empatia.docx"},
+  {k:"Plantilla",st:"Definir",t:"Enunciado del problema",p:"Usuario + necesidad + insight: escribe tu reto en una frase.",f:"Plantilla editable · Word",u:"recursos/enunciado-del-problema.docx"},
+  {k:"Guía",st:"Idear",t:"Lluvia de ideas en 15 minutos",p:"Técnicas rápidas para generar muchas ideas y elegir la mejor.",f:"PDF · 2 págs",u:"recursos/guia-lluvia-de-ideas-en-15-minutos.pdf"},
+  {k:"Plantilla",st:"Prototipar",t:"Lienzo de MVP",p:"Define qué vas a construir primero y cómo lo vas a probar.",f:"Plantilla editable · Word",u:"recursos/lienzo-de-mvp.docx"},
+  {k:"Caso",st:"Prototipar",t:"Prototipos con S/ 0",p:"Ejemplos de MVP hechos con papel, formularios y redes sociales.",f:"Caso de estudio · PDF · 3 págs",u:"recursos/caso-prototipos-con-s-0.pdf"},
+  {k:"Plantilla",st:"Modelo de Negocio",t:"Lean Canvas escolar",p:"Los 9 bloques del modelo de negocio adaptados a secundaria.",f:"Plantilla editable · Word",u:"recursos/lean-canvas-escolar.docx"},
+  {k:"Guía",st:"Pitch",t:"No es lo que dices, sino cómo lo dices",p:"Material del taller de apertura de comunicación y storytelling.",f:"Video + PDF"},
+  {k:"Plantilla",st:"Pitch",t:"Estructura de pitch de 3 minutos",p:"Gancho, problema, solución, prueba y pedido, con el tiempo de cada bloque.",f:"Plantilla editable · Word",u:"recursos/pitch-de-3-minutos.docx"},
+  {k:"Documento",st:"Concurso",t:"Bases oficiales Startup School 2026",p:"Participantes, etapas, criterios de evaluación y premios.",f:"PDF · 8 págs"},
+  {k:"Plantilla",st:"Concurso",t:"Ficha de proyecto final",p:"El entregable que cada equipo presenta al cierre del programa.",f:"Plantilla editable · Word",u:"recursos/ficha-de-proyecto-final.docx"}
+];
+const PROJ=[
+  {n:"AgroLink Satipo",t:"Conecta a productores de café con bodegas del pueblo.",st:"Ideas",e:"Equipo Cóndor"},
+  {n:"Cacao Kids",t:"Snacks de cacao local para loncheras escolares.",st:"Prototipos",e:"Equipo Selva"},
+  {n:"RutaSegura",t:"Aviso por WhatsApp cuando llega la combi escolar.",st:"Validados",e:"Equipo Ruta"},
+  {n:"ReciclArte",t:"Útiles escolares hechos con plástico reciclado.",st:"Problema definido",e:"Equipo Verde"},
+  {n:"Tutor Par",t:"Clases de refuerzo entre estudiantes por S/ 5.",st:"Pitch",e:"Equipo Lumen"},
+  {n:"Mercadito Online",t:"Catálogo digital para los puestos del mercado.",st:"Ideas",e:"Equipo Feria"},
+  {n:"Agua Clara",t:"Filtro casero de bajo costo para zonas rurales.",st:"Prototipos",e:"Equipo Río"},
+  {n:"Tejidos Asháninka",t:"Venta en redes de artesanía de la comunidad.",st:"Validados",e:"Equipo Raíz"},
+  {n:"StudyBox",t:"Kits de estudio para exámenes de admisión.",st:"Pitch",e:"Equipo Norte"}
+];
+const STAGES=["Ideas","Problema definido","Prototipos","Validados","Pitch"];
+const STEPS=[
+  ...SESSIONS.slice(0,6).map(x=>({id:x.s,t:x.s,p:"Sesión con "+x.m,w:x.d})),
+  {id:"mentoria",t:"Mentoría de equipo",p:"Una mentoría por equipo para revisar el avance",w:"nov"},
+  {id:"mvp",t:"MVP listo",p:"Producto, servicio o prototipo que demuestre tu propuesta",w:"antes 21 nov"},
+  {id:"ficha",t:"Ficha de proyecto enviada",p:"Entregable final del programa",w:"21 nov"}
+];
+const HERO={
+  recursos:["Startup School 2026 · Aprende y Emprende","Todo lo que tu equipo necesita para llegar al pitch","Guías, plantillas y el calendario de las 6 sesiones de Design Thinking, del 2 al 18 de noviembre."],
+  proyectos:["Proyectos","Ideas que están tomando forma","Conoce los proyectos de otros equipos, en qué etapa están y qué necesitan para seguir avanzando."],
+  progreso:["Mi progreso","Así va tu equipo","Del primer día de Empatizar hasta la presentación final del 21 de noviembre."]
+};
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function chips(el,items,counts,cur,on){
+  el.innerHTML=["Todos",...items].map(x=>`<button class="chip" type="button" aria-pressed="${x===cur}" data-x="${esc(x)}">${esc(x)} <span>${counts(x)}</span></button>`).join("");
+  el.onclick=e=>{const b=e.target.closest(".chip");if(b)on(b.dataset.x)};
+}
+let resF="Todos",projF="Todos";
+function renderRes(){
+  const sts=[...new Set(RES.map(r=>r.st))];
+  chips($("#resFilter"),sts,x=>x==="Todos"?RES.length:RES.filter(r=>r.st===x).length,resF,x=>{resF=x;renderRes()});
+  $("#resGrid").innerHTML=RES.filter(r=>resF==="Todos"||r.st===resF).map(r=>`<article class="card"><div class="kind">${r.k}</div><h3>${esc(r.t)}</h3><p>${esc(r.p)}</p><div class="meta"><span class="tag st">${esc(r.st)}</span><span class="tag">${esc(r.f)}</span></div>${r.u?`<a class="btn dl" href="${encodeURI(r.u)}" target="_blank" rel="noopener" download>Descargar</a>`:`<span class="tag soon">Próximamente</span>`}</article>`).join("");
+}
+function renderProj(){
+  chips($("#projFilter"),STAGES,x=>x==="Todos"?PROJ.length:PROJ.filter(p=>p.st===x).length,projF,x=>{projF=x;renderProj()});
+  $("#projGrid").innerHTML=PROJ.filter(p=>projF==="Todos"||p.st===projF).map(p=>`<article class="card"><div class="kind">${esc(p.e)}</div><h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="meta"><span class="tag st">${esc(p.st)}</span><span class="tag">2 estudiantes</span></div></article>`).join("");
+}
+$("#calBody").innerHTML=SESSIONS.map(s=>`<tr><td class="d">${s.d}</td><td>${esc(s.s)}</td><td>${esc(s.m)}</td></tr>`).join("");
+
+let done={};
+try{done=JSON.parse(localStorage.getItem("ir-progreso")||"{}")}catch(e){}
+function save(){try{localStorage.setItem("ir-progreso",JSON.stringify(done))}catch(e){}}
+function renderProg(){
+  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p></div><span class="when">${esc(s.w)}</span></label>`).join("");
+  const n=STEPS.filter(s=>done[s.id]).length,pct=Math.round(n/STEPS.length*100);
+  $("#ringPct").textContent=$("#navPct").textContent=pct+"%";
+  $("#ringSub").textContent=`${n} de ${STEPS.length}`;
+  $("#ringArc").style.strokeDashoffset=326.7*(1-pct/100);
+  const next=STEPS.find(s=>!done[s.id]);
+  $("#progMsg").textContent=next?`Siguiente paso: ${next.t}`:"¡Listos para el pitch final!";
+}
+$("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg()});
+$("#reset").onclick=()=>{done={};save();renderProg()};
+
+function show(v){
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
+  ["recursos","proyectos","progreso"].forEach(k=>$("#v-"+k).hidden=k!==v);
+  const [e,t,p]=HERO[v];$("#hEye").textContent=e;$("#hTitle").textContent=t;$("#hText").textContent=p;
+  try{localStorage.setItem("ir-tab",v)}catch(e){}
+}
+document.querySelector("nav").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.v)};
+renderRes();renderProj();renderProg();
+let start="recursos";
+const h=location.hash.slice(1);
+if(HERO[h])start=h;else{try{const t=localStorage.getItem("ir-tab");if(HERO[t])start=t}catch(e){}}
+show(start);
+</script>
+</body></html>
