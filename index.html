@@ -81,6 +81,11 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .step.done{background:var(--ok-bg);border-color:transparent}
 .step.done h3{color:var(--ok)}
 .when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.teampick{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
+.teampick label{font:700 13px var(--body);color:var(--muted)}
+.teampick select{font:600 14px var(--body);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink,inherit);min-width:200px}
+.syncmsg{font:600 12px var(--body);color:var(--muted)}
+.syncmsg.ok{color:var(--ok)}
 .btn{font:600 14px var(--body);background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;margin-top:14px}
 a.tag.dl{text-decoration:none;cursor:pointer;transition:.15s}
 a.tag.dl:hover,a.tag.dl:focus-visible{background:var(--orange);color:var(--navy)}
@@ -146,7 +151,8 @@ footer .wrap{padding-block:20px}
       <div>
         <div class="eyebrow">Tu ruta al pitch</div>
         <h2 style="margin:6px 0 8px" id="progMsg">Empieza por Empatizar</h2>
-        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda solo en este navegador.</p>
+        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda en este navegador y, si eliges tu equipo, también lo ven tus mentores.</p>
+        <div class="teampick"><label for="team">Mi equipo</label><select id="team"></select><span id="syncMsg" class="syncmsg"></span></div>
       </div>
     </div>
     <h2>Etapas</h2>
@@ -235,8 +241,23 @@ function renderProg(){
   const next=STEPS.find(s=>!done[s.id]);
   $("#progMsg").textContent=next?`Siguiente paso: ${next.t}`:"¡Listos para el pitch final!";
 }
-$("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg()});
-$("#reset").onclick=()=>{done={};save();renderProg()};
+// ---- Envío del avance a la hoja de Google (ver apps-script.gs) ----
+const SYNC_URL="";   // pega aquí la URL de tu Apps Script (termina en /exec)
+const TEAMS=["Equipo Cóndor","Equipo Selva","Equipo Ruta","Equipo Verde","Equipo Lumen","Equipo Feria","Equipo Río","Equipo Raíz","Equipo Norte"]; // cambia por los equipos reales
+let team="";try{team=localStorage.getItem("ir-equipo")||""}catch(e){}
+$("#team").innerHTML='<option value="">— Elige tu equipo —</option>'+TEAMS.map(t=>`<option${t===team?" selected":""}>${esc(t)}</option>`).join("");
+function sync(){
+  const m=$("#syncMsg");
+  if(!SYNC_URL||!team){m.textContent="";return}
+  const steps={};STEPS.forEach(s=>steps[s.id]=!!done[s.id]);
+  m.className="syncmsg";m.textContent="Enviando…";
+  fetch(SYNC_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({team,order:STEPS.map(s=>s.id),steps})})
+    .then(()=>{m.className="syncmsg ok";m.textContent="Avance enviado ✓"})
+    .catch(()=>{m.className="syncmsg";m.textContent="No se pudo enviar. Revisa tu conexión."});
+}
+$("#team").onchange=e=>{team=e.target.value;try{localStorage.setItem("ir-equipo",team)}catch(x){}sync()};
+$("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
+$("#reset").onclick=()=>{done={};save();renderProg();sync()};
 
 function show(v){
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
