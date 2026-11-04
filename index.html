@@ -82,9 +82,8 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .step.done h3{color:var(--ok)}
 .when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .btn{font:600 14px var(--body);background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;margin-top:14px}
-.dl{display:block;text-align:center;text-decoration:none;color:var(--navy);background:var(--orange);border-color:var(--orange);font-weight:700;margin-top:10px}
-.dl:hover{filter:brightness(1.06)}
-.soon{align-self:flex-start;margin-top:10px}
+a.tag.dl{text-decoration:none;cursor:pointer;transition:.15s}
+a.tag.dl:hover,a.tag.dl:focus-visible{background:var(--orange);color:var(--navy)}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 footer .wrap{padding-block:20px}
 @media (max-width:640px){
@@ -216,7 +215,7 @@ let resF="Todos",projF="Todos";
 function renderRes(){
   const sts=[...new Set(RES.map(r=>r.st))];
   chips($("#resFilter"),sts,x=>x==="Todos"?RES.length:RES.filter(r=>r.st===x).length,resF,x=>{resF=x;renderRes()});
-  $("#resGrid").innerHTML=RES.filter(r=>resF==="Todos"||r.st===resF).map(r=>`<article class="card"><div class="kind">${r.k}</div><h3>${esc(r.t)}</h3><p>${esc(r.p)}</p><div class="meta"><span class="tag st">${esc(r.st)}</span><span class="tag">${esc(r.f)}</span></div>${r.u?`<a class="btn dl" href="${encodeURI(r.u)}" target="_blank" rel="noopener" download>Descargar</a>`:`<span class="tag soon">Próximamente</span>`}</article>`).join("");
+  $("#resGrid").innerHTML=RES.filter(r=>resF==="Todos"||r.st===resF).map(r=>`<article class="card"><div class="kind">${r.k}</div><h3>${esc(r.t)}</h3><p>${esc(r.p)}</p><div class="meta"><span class="tag st">${esc(r.st)}</span>${r.u?`<a class="tag dl" href="${encodeURI(r.u)}" target="_blank" rel="noopener" download title="Clic para descargar">${esc(r.f)} ⬇</a>`:`<span class="tag">${esc(r.f)} · Próximamente</span>`}</div></article>`).join("");
 }
 function renderProj(){
   chips($("#projFilter"),STAGES,x=>x==="Todos"?PROJ.length:PROJ.filter(p=>p.st===x).length,projF,x=>{projF=x;renderProj()});
