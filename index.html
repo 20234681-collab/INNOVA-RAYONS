@@ -81,9 +81,11 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .step.done{background:var(--ok-bg);border-color:transparent}
 .step.done h3{color:var(--ok)}
 .when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.regbtn{display:inline-block;margin-left:8px;background:var(--orange);color:var(--navy);font-weight:700;text-decoration:none;padding:6px 14px;border-radius:999px}
+.empty{grid-column:1/-1;color:var(--muted);padding:18px 0}
 .teampick{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
 .teampick label{font:700 13px var(--body);color:var(--muted)}
-.teampick select{font:600 14px var(--body);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink,inherit);min-width:200px}
+.teampick input{font:600 14px var(--body);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:inherit;min-width:220px}
 .syncmsg{font:600 12px var(--body);color:var(--muted)}
 .syncmsg.ok{color:var(--ok)}
 .btn{font:600 14px var(--body);background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;margin-top:14px}
@@ -136,7 +138,7 @@ footer .wrap{padding-block:20px}
 
   <!-- PROYECTOS -->
   <section id="v-proyectos" role="tabpanel" aria-labelledby="t-proyectos" hidden>
-    <div class="note"><span>ⓘ</span><div><strong>Contenido de demostración.</strong> Los equipos y proyectos de esta sección son ficticios. Aquí aparecerán los proyectos reales de los 10 equipos del concurso.</div></div>
+    <div class="note"><span>ⓘ</span><div><strong>¿Ya tienes tu proyecto?</strong> Regístralo con el formulario. Aparecerá aquí cuando tus mentores lo revisen. <a class="regbtn" href="https://docs.google.com/forms/d/e/1FAIpQLSedcmlf444D3q7om-tgAo1tIRy2l67rs3RuKkX-sNikRIWCkg/viewform?usp=header" target="_blank" rel="noopener">Registrar mi proyecto</a></div></div>
     <div class="chips" id="projFilter"></div>
     <div class="grid" id="projGrid"></div>
   </section>
@@ -151,8 +153,8 @@ footer .wrap{padding-block:20px}
       <div>
         <div class="eyebrow">Tu ruta al pitch</div>
         <h2 style="margin:6px 0 8px" id="progMsg">Empieza por Empatizar</h2>
-        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda en este navegador y, si eliges tu equipo, también lo ven tus mentores.</p>
-        <div class="teampick"><label for="team">Mi equipo</label><select id="team"></select><span id="syncMsg" class="syncmsg"></span></div>
+        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda en este navegador y, si escribes el nombre de tu equipo, también lo ven tus mentores.</p>
+        <div class="teampick"><label for="team">Nombre de mi equipo</label><input id="team" type="text" maxlength="40" placeholder="Escríbelo una sola vez" autocomplete="off"><span id="syncMsg" class="syncmsg"></span></div>
       </div>
     </div>
     <h2>Etapas</h2>
@@ -187,17 +189,9 @@ const RES=[
   {k:"Documento",st:"Concurso",t:"Bases oficiales Startup School 2026",p:"Participantes, etapas, criterios de evaluación y premios.",f:"PDF · 8 págs"},
   {k:"Plantilla",st:"Concurso",t:"Ficha de proyecto final",p:"El entregable que cada equipo presenta al cierre del programa.",f:"Plantilla editable · Word",u:"recursos/ficha-de-proyecto-final.docx"}
 ];
-const PROJ=[
-  {n:"AgroLink Satipo",t:"Conecta a productores de café con bodegas del pueblo.",st:"Ideas",e:"Equipo Cóndor"},
-  {n:"Cacao Kids",t:"Snacks de cacao local para loncheras escolares.",st:"Prototipos",e:"Equipo Selva"},
-  {n:"RutaSegura",t:"Aviso por WhatsApp cuando llega la combi escolar.",st:"Validados",e:"Equipo Ruta"},
-  {n:"ReciclArte",t:"Útiles escolares hechos con plástico reciclado.",st:"Problema definido",e:"Equipo Verde"},
-  {n:"Tutor Par",t:"Clases de refuerzo entre estudiantes por S/ 5.",st:"Pitch",e:"Equipo Lumen"},
-  {n:"Mercadito Online",t:"Catálogo digital para los puestos del mercado.",st:"Ideas",e:"Equipo Feria"},
-  {n:"Agua Clara",t:"Filtro casero de bajo costo para zonas rurales.",st:"Prototipos",e:"Equipo Río"},
-  {n:"Tejidos Asháninka",t:"Venta en redes de artesanía de la comunidad.",st:"Validados",e:"Equipo Raíz"},
-  {n:"StudyBox",t:"Kits de estudio para exámenes de admisión.",st:"Pitch",e:"Equipo Norte"}
-];
+// Proyectos: se leen de la hoja de respuestas del formulario (pestaña publicada como CSV).
+const PROJ_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vT9ZSiwxxqnXvtrZnWA1f_cKf90lCzifnh_5u6Q3VI498dOyVJnxHP0JZ_TQEPy1u2NThDFVj6MzSPJ/pub?gid=544221364&single=true&output=csv";   // pega aquí el enlace CSV de la pestaña de respuestas del formulario
+let PROJ=[];
 const STAGES=["Ideas","Problema definido","Prototipos","Validados","Pitch"];
 const STEPS=[
   ...SESSIONS.slice(0,6).map(x=>({id:x.s,t:x.s,p:"Sesión con "+x.m,w:x.d})),
@@ -225,7 +219,21 @@ function renderRes(){
 }
 function renderProj(){
   chips($("#projFilter"),STAGES,x=>x==="Todos"?PROJ.length:PROJ.filter(p=>p.st===x).length,projF,x=>{projF=x;renderProj()});
-  $("#projGrid").innerHTML=PROJ.filter(p=>projF==="Todos"||p.st===projF).map(p=>`<article class="card"><div class="kind">${esc(p.e)}</div><h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="meta"><span class="tag st">${esc(p.st)}</span><span class="tag">2 estudiantes</span></div></article>`).join("");
+  const list=PROJ.filter(p=>projF==="Todos"||p.st===projF);
+  $("#projGrid").innerHTML=list.length?list.map(p=>`<article class="card"><div class="kind">${esc(p.e)}</div><h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="meta"><span class="tag st">${esc(p.st)}</span></div></article>`).join(""):`<p class="empty">${PROJ.length?"No hay proyectos en esta etapa todavía.":"Aún no hay proyectos publicados. Pronto verás aquí los de cada equipo."}</p>`;
+}
+const nk=t=>String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+function parseCSV(t){const rows=[];let r=[],c="",q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===","){r.push(c);c=""}else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&t[i+1]==="\n")i++;r.push(c);rows.push(r);r=[];c=""}else c+=ch}if(c||r.length){r.push(c);rows.push(r)}return rows}
+async function loadProj(){
+  if(!PROJ_CSV)return;
+  try{
+    const rows=parseCSV(await (await fetch(PROJ_CSV,{cache:"no-store"})).text());
+    const h=rows[0].map(nk),ix=w=>h.findIndex(x=>x.includes(w));
+    const iE=ix("equipo"),iN=ix("proyecto"),iT=ix("descrip"),iS=ix("etapa"),iP=ix("publicar");
+    if([iE,iN,iT,iS,iP].some(i=>i<0))return;
+    PROJ=rows.slice(1).filter(r=>nk(r[iP])==="si").map(r=>({e:(r[iE]||"").trim(),n:(r[iN]||"").trim(),t:(r[iT]||"").trim(),st:STAGES.find(x=>nk(x)===nk(r[iS]))||""})).filter(p=>p.n&&p.st);
+    renderProj();
+  }catch(e){}
 }
 $("#calBody").innerHTML=SESSIONS.map(s=>`<tr><td class="d">${s.d}</td><td>${esc(s.s)}</td><td>${esc(s.m)}</td></tr>`).join("");
 
@@ -242,10 +250,9 @@ function renderProg(){
   $("#progMsg").textContent=next?`Siguiente paso: ${next.t}`:"¡Listos para el pitch final!";
 }
 // ---- Envío del avance a la hoja de Google (ver apps-script.gs) ----
-const SYNC_URL="";   // pega aquí la URL de tu Apps Script (termina en /exec)
-const TEAMS=["Equipo Cóndor","Equipo Selva","Equipo Ruta","Equipo Verde","Equipo Lumen","Equipo Feria","Equipo Río","Equipo Raíz","Equipo Norte"]; // cambia por los equipos reales
+const SYNC_URL="https://script.google.com/macros/s/AKfycbwdk9uS5jyWjkUd5Mf5-j7UwJ9_yUNlBLnf2owG-d3eaNSuGqp9_Xh4-osIr2FKKVaOVw/exec";   // pega aquí la URL de tu Apps Script (termina en /exec)
 let team="";try{team=localStorage.getItem("ir-equipo")||""}catch(e){}
-$("#team").innerHTML='<option value="">— Elige tu equipo —</option>'+TEAMS.map(t=>`<option${t===team?" selected":""}>${esc(t)}</option>`).join("");
+$("#team").value=team;
 function sync(){
   const m=$("#syncMsg");
   if(!SYNC_URL||!team){m.textContent="";return}
@@ -255,7 +262,7 @@ function sync(){
     .then(()=>{m.className="syncmsg ok";m.textContent="Avance enviado ✓"})
     .catch(()=>{m.className="syncmsg";m.textContent="No se pudo enviar. Revisa tu conexión."});
 }
-$("#team").onchange=e=>{team=e.target.value;try{localStorage.setItem("ir-equipo",team)}catch(x){}sync()};
+$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}sync()};
 $("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
 $("#reset").onclick=()=>{done={};save();renderProg();sync()};
 
@@ -266,7 +273,7 @@ function show(v){
   try{localStorage.setItem("ir-tab",v)}catch(e){}
 }
 document.querySelector("nav").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.v)};
-renderRes();renderProj();renderProg();
+renderRes();renderProj();renderProg();loadProj();
 let start="recursos";
 const h=location.hash.slice(1);
 if(HERO[h])start=h;else{try{const t=localStorage.getItem("ir-tab");if(HERO[t])start=t}catch(e){}}
