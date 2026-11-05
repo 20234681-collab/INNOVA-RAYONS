@@ -1,6 +1,6 @@
-# Hub Innova Rayons
+# Hub Innova Crayons
 
-Hub digital de **Startup School 2026 · Aprende y Emprende**, del Centro de Emprendimiento **Innova Rayons**. Reúne en un solo lugar las guías, plantillas y el calendario del programa, los proyectos de los equipos y el avance de cada uno hacia el pitch final.
+Hub digital de **Startup School 2026 · Aprende y Emprende**, del Centro de Emprendimiento **Innova Crayons**. Reúne en un solo lugar las guías, plantillas y el calendario del programa, los proyectos de los equipos y el avance de cada uno hacia el pitch final.
 
 Sitio publicado: https://innovarayonshub.netlify.app/
 
@@ -16,7 +16,7 @@ Sitio publicado: https://innovarayonshub.netlify.app/
 ```
 hub-innova-rayons/
 ├── index.html          Todo el sitio (diseño, datos y código)
-├── logo-innova.png     Logo de Innova Rayons
+├── logo-innova.png     Logo de Innova Crayons
 ├── logo-startup.jpg    Logo de Startup School 2026
 ├── README.md           Este archivo
 └── recursos/           PDFs y plantillas que se descargan desde el sitio
@@ -99,4 +99,4 @@ La meta mínima para la presentación final es tener un **MVP** y la **ficha de 
 
 ---
 
-Innova Rayons · Centro de Emprendimiento · Startup School 2026, primera edición.
+Innova Crayons · Centro de Emprendimiento · Startup School 2026, primera edición.
