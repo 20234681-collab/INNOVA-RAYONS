@@ -78,6 +78,9 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .step input{width:22px;height:22px;accent-color:var(--orange);cursor:pointer}
 .step h3{font:700 16px var(--display);margin:0}
 .step p{margin:0;font-size:14px;color:var(--muted)}
+.step.locked{opacity:.75;cursor:default}
+.step.locked input{cursor:not-allowed}
+.lockmsg{color:var(--muted);font-size:13px!important;margin-top:4px!important}
 .step.done{background:var(--ok-bg);border-color:transparent}
 .step.done h3{color:var(--ok)}
 .when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -162,11 +165,12 @@ footer .wrap{padding-block:20px}
         <h2 style="margin:6px 0 8px" id="progMsg">Empieza por Empatizar</h2>
         <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda en este navegador y, si escribes el nombre de tu equipo, también lo ven tus mentores.</p>
         <div class="teampick"><label for="team">Nombre de mi equipo</label><input id="team" type="text" maxlength="40" placeholder="Escríbelo una sola vez" autocomplete="off"><span id="syncMsg" class="syncmsg"></span></div>
+        <div class="teampick"><label for="m1">Integrantes</label><input id="m1" type="text" maxlength="60" placeholder="Nombre y apellido · integrante 1" autocomplete="off"><input id="m2" type="text" maxlength="60" placeholder="Nombre y apellido · integrante 2" autocomplete="off"></div>
       </div>
     </div>
     <h2>Etapas</h2>
     <div class="steps" id="steps"></div>
-    <p class="upnote" id="upNote">Cada etapa con plantilla tiene un botón <b>Subir</b>: elige tu archivo (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y lo recibirán tus mentores. Antes escribe el nombre de tu equipo arriba.</p>
+    <p class="upnote" id="upNote">Para avanzar: 1) escribe el nombre de tu equipo y el de sus 2 integrantes, 2) sube la plantilla de la etapa con el botón <b>Subir</b> (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y 3) marca la casilla. Mentoría y MVP listo se marcan solo con esos datos.</p>
     <input id="uplFile" type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg">
     <div class="upother"><button class="btn up" type="button" data-tpl="Otro" data-id="otro">Subir otro archivo</button> <span class="upst" id="upst-otro"></span></div>
     <button class="btn" id="reset" type="button">Reiniciar progreso</button>
@@ -251,8 +255,9 @@ let done={};
 try{done=JSON.parse(localStorage.getItem("ir-progreso")||"{}")}catch(e){}
 function save(){try{localStorage.setItem("ir-progreso",JSON.stringify(done))}catch(e){}}
 let sent={};try{sent=JSON.parse(localStorage.getItem("ir-enviadas")||"{}")}catch(e){}
+const lock=s=>!ready()||(s.tpl&&!sent[s.id]);
 function renderProg(){
-  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p></div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
+  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}${lock(s)?" locked":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""} ${lock(s)?"disabled":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p>${lock(s)&&!done[s.id]?`<p class="lockmsg">🔒 ${!ready()?"Primero escribe el nombre de tu equipo y el de sus 2 integrantes.":"Sube tu plantilla para poder marcar esta etapa."}</p>`:""}</div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
   const n=STEPS.filter(s=>done[s.id]).length,pct=Math.round(n/STEPS.length*100);
   $("#ringPct").textContent=$("#navPct").textContent=pct+"%";
   $("#ringSub").textContent=`${n} de ${STEPS.length}`;
@@ -263,17 +268,22 @@ function renderProg(){
 // ---- Envío del avance a la hoja de Google (ver apps-script.gs) ----
 const SYNC_URL="https://script.google.com/macros/s/AKfycbwdk9uS5jyWjkUd5Mf5-j7UwJ9_yUNlBLnf2owG-d3eaNSuGqp9_Xh4-osIr2FKKVaOVw/exec";   // pega aquí la URL de tu Apps Script (termina en /exec)
 let team="";try{team=localStorage.getItem("ir-equipo")||""}catch(e){}
+let members=["",""];try{members=JSON.parse(localStorage.getItem("ir-miembros")||'["",""]')}catch(e){}
+const ready=()=>!!(team&&members[0]&&members[1]);
+$("#m1").value=members[0]||"";$("#m2").value=members[1]||"";
 $("#team").value=team;
 function sync(){
   const m=$("#syncMsg");
   if(!SYNC_URL||!team){m.textContent="";return}
   const steps={};STEPS.forEach(s=>steps[s.id]=!!done[s.id]);
   m.className="syncmsg";m.textContent="Enviando…";
-  fetch(SYNC_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({team,order:STEPS.map(s=>s.id),steps})})
+  fetch(SYNC_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({team,miembros:members,order:STEPS.map(s=>s.id),steps})})
     .then(()=>{m.className="syncmsg ok";m.textContent="Avance enviado ✓"})
     .catch(()=>{m.className="syncmsg";m.textContent="No se pudo enviar. Revisa tu conexión."});
 }
-$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}sync()};
+const onMem=()=>{members=[$("#m1").value.trim().replace(/\s+/g," "),$("#m2").value.trim().replace(/\s+/g," ")];$("#m1").value=members[0];$("#m2").value=members[1];try{localStorage.setItem("ir-miembros",JSON.stringify(members))}catch(x){}renderProg();sync()};
+$("#m1").onchange=$("#m2").onchange=onMem;
+$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}renderProg();sync()};
 $("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
 // ---- Subir plantilla (botón por etapa) ----
 let upCur=null;
@@ -282,7 +292,7 @@ document.addEventListener("click",e=>{
   const b=e.target.closest(".btn.up");if(!b)return;
   e.preventDefault();e.stopPropagation();
   if(!SYNC_URL)return setSt(b.dataset.id,"El envío aún no está activado.");
-  if(!team){setSt(b.dataset.id,"Escribe primero el nombre de tu equipo.");$("#team").focus();return}
+  if(!ready()){setSt(b.dataset.id,"Escribe primero el nombre de tu equipo y el de sus 2 integrantes.");(team?$("#m1"):$("#team")).focus();return}
   upCur={tpl:b.dataset.tpl,id:b.dataset.id,btn:b};$("#uplFile").value="";$("#uplFile").click();
 },true);
 $("#uplFile").onchange=async()=>{
