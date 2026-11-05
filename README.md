@@ -72,10 +72,10 @@ Funciona con PDF, Word, Excel y PowerPoint. GitHub acepta archivos de hasta 25 M
 | Lean Canvas escolar | Plantilla | Modelo de Negocio | `lean-canvas-escolar.docx` |
 | No es lo que dices, sino cómo lo dices | Guía | Pitch | Pendiente (material del taller de comunicación) |
 | Estructura de pitch de 3 minutos | Plantilla | Pitch | `pitch-de-3-minutos.docx` |
-| Bases oficiales Startup School 2026 | Documento | Concurso | Pendiente (las entrega la organización) |
+| Bases oficiales Startup School 2026 | Documento | Concurso | `bases-oficiales-startup-school-2026.pdf` |
 | Ficha de proyecto final | Plantilla | Concurso | `ficha-de-proyecto-final.docx` |
 
-Los recursos pendientes se muestran como "Próximamente" hasta que se suba su archivo.
+El recurso pendiente se muestra como "Próximamente" hasta que se suba su archivo.
 
 ## Calendario del programa
 
@@ -85,8 +85,8 @@ Los recursos pendientes se muestran como "Próximamente" hasta que se suba su ar
 | 4 de noviembre | Definir | Luz A. Herrera |
 | 9 de noviembre | Idear | Mate Valencia |
 | 11 de noviembre | Prototipar | Cristhian Valle |
-| 16 de noviembre | Modelo de Negocio | Diego Rodríguez |
-| 18 de noviembre | Pitch | Por confirmar |
+| 16 de noviembre | Modelo de Negocio | Diego Rodríguez Franco |
+| 18 de noviembre | Pitch | Mariah Anglas Pasache |
 | 21 de noviembre | Presentación final ante el jurado | Jurado del concurso |
 
 La meta mínima para la presentación final es tener un **MVP** y la **ficha de proyecto**.
