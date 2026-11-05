@@ -82,6 +82,11 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .step.done h3{color:var(--ok)}
 .when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .regbtn{display:inline-block;margin-left:8px;background:var(--orange);color:var(--navy);font-weight:700;text-decoration:none;padding:6px 14px;border-radius:999px}
+.upl{margin-bottom:8px}
+.upl label{font:700 13px var(--body);color:var(--muted);margin-top:6px}
+.upl select,.upl input[type=file]{font:600 14px var(--body);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:inherit;max-width:100%}
+.btn.upbtn{background:var(--orange);color:var(--navy);border-color:var(--orange);font-weight:700;margin-top:6px}
+.btn.upbtn:disabled{opacity:.6;cursor:wait}
 .empty{grid-column:1/-1;color:var(--muted);padding:18px 0}
 .teampick{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
 .teampick label{font:700 13px var(--body);color:var(--muted)}
@@ -159,6 +164,15 @@ footer .wrap{padding-block:20px}
     </div>
     <h2>Etapas</h2>
     <div class="steps" id="steps"></div>
+    <h2>Sube tu plantilla</h2>
+    <div class="upl card" id="upl">
+      <p>¿Ya completaste una plantilla? Envíala aquí para que tus mentores la revisen. Primero escribe el nombre de tu equipo arriba.</p>
+      <label for="uplTpl">¿Qué plantilla es?</label>
+      <select id="uplTpl"><option>Mapa de empatía</option><option>Enunciado del problema</option><option>Lienzo de MVP</option><option>Lean Canvas escolar</option><option>Pitch de 3 minutos</option><option>Ficha de proyecto final</option><option>Otro</option></select>
+      <label for="uplFile">Archivo (Word, PDF, Excel, PowerPoint o imagen · máximo 8 MB)</label>
+      <input id="uplFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg">
+      <div><button class="btn upbtn" id="uplBtn" type="button">Enviar plantilla</button> <span class="syncmsg" id="uplMsg"></span></div>
+    </div>
     <button class="btn" id="reset" type="button">Reiniciar progreso</button>
   </section>
 
@@ -264,6 +278,22 @@ function sync(){
 }
 $("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}sync()};
 $("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
+// ---- Subir plantilla ----
+$("#uplBtn").onclick=async()=>{
+  const m=$("#uplMsg"),f=$("#uplFile").files[0],ok=(t,c)=>{m.className="syncmsg"+(c?" "+c:"");m.textContent=t};
+  if(!SYNC_URL)return ok("El envío aún no está activado.");
+  if(!team)return ok("Escribe el nombre de tu equipo arriba antes de enviar.");
+  if(!f)return ok("Elige un archivo.");
+  if(f.size>8*1024*1024)return ok("El archivo pesa más de 8 MB.");
+  const b=$("#uplBtn");b.disabled=true;ok("Enviando… no cierres la página.");
+  try{
+    const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(f)});
+    const r=await fetch(SYNC_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({tipo:"entrega",team,plantilla:$("#uplTpl").value,nombre:f.name,data})});
+    const j=await r.json();
+    if(j.ok){ok("Plantilla enviada ✓","ok");$("#uplFile").value=""}else ok(j.error||"No se pudo enviar.");
+  }catch(e){ok("No se pudo confirmar el envío. Inténtalo otra vez o avisa a tu mentor.")}
+  b.disabled=false;
+};
 $("#reset").onclick=()=>{done={};save();renderProg();sync()};
 
 function show(v){
