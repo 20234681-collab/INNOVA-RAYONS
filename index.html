@@ -247,10 +247,13 @@ async function loadProj(){
 }
 $("#calBody").innerHTML=SESSIONS.map(s=>`<tr><td class="d">${s.d}</td><td>${esc(s.s)}</td><td>${esc(s.m)}</td></tr>`).join("");
 
-let done={};
-try{done=JSON.parse(localStorage.getItem("ir-progreso")||"{}")}catch(e){}
-function save(){try{localStorage.setItem("ir-progreso",JSON.stringify(done))}catch(e){}}
-let sent={};try{sent=JSON.parse(localStorage.getItem("ir-enviadas")||"{}")}catch(e){}
+let team="";try{team=localStorage.getItem("ir-equipo")||""}catch(e){}
+// El avance y las plantillas enviadas se guardan POR PROYECTO, para que dos equipos en el mismo computador no se mezclen.
+const nk=t=>String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+const rd=k=>{try{return JSON.parse(localStorage.getItem(k+"::"+nk(team))||"{}")}catch(e){return {}}};
+let done=rd("ir-progreso"),sent=rd("ir-enviadas");
+function save(){try{localStorage.setItem("ir-progreso::"+nk(team),JSON.stringify(done))}catch(e){}}
+function saveSent(){try{localStorage.setItem("ir-enviadas::"+nk(team),JSON.stringify(sent))}catch(e){}}
 const lock=s=>!ready()||(s.tpl&&!sent[s.id]);
 function renderProg(){
   $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}${lock(s)?" locked":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""} ${lock(s)?"disabled":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p>${lock(s)&&!done[s.id]?`<p class="lockmsg">🔒 ${!ready()?"Primero escribe el nombre de tu proyecto.":"Sube tu plantilla para poder marcar esta etapa."}</p>`:""}</div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
@@ -263,7 +266,6 @@ function renderProg(){
 }
 // ---- Envío del avance a la hoja de Google (ver apps-script.gs) ----
 const SYNC_URL="https://script.google.com/macros/s/AKfycbwdk9uS5jyWjkUd5Mf5-j7UwJ9_yUNlBLnf2owG-d3eaNSuGqp9_Xh4-osIr2FKKVaOVw/exec";   // pega aquí la URL de tu Apps Script (termina en /exec)
-let team="";try{team=localStorage.getItem("ir-equipo")||""}catch(e){}
 const ready=()=>!!team;
 $("#team").value=team;
 function sync(){
@@ -275,7 +277,7 @@ function sync(){
     .then(()=>{m.className="syncmsg ok";m.textContent="Avance enviado ✓"})
     .catch(()=>{m.className="syncmsg";m.textContent="No se pudo enviar. Revisa tu conexión."});
 }
-$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}renderProg();sync()};
+$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}done=rd("ir-progreso");sent=rd("ir-enviadas");renderProg();sync()};
 $("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
 // ---- Subir plantilla (botón por etapa) ----
 let upCur=null;
@@ -296,7 +298,7 @@ $("#uplFile").onchange=async()=>{
     const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(f)});
     const r=await fetch(SYNC_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({tipo:"entrega",team,plantilla:tpl,nombre:f.name,data})});
     const j=await r.json();
-    if(j.ok){sent[id]=1;try{localStorage.setItem("ir-enviadas",JSON.stringify(sent))}catch(x){}renderProg();setSt(id,"Enviada ✓","ok")}
+    if(j.ok){sent[id]=1;saveSent();renderProg();setSt(id,"Enviada ✓","ok")}
     else setSt(id,j.error||"No se pudo enviar.");
   }catch(x){setSt(id,"No se pudo confirmar el envío. Inténtalo otra vez.")}
   btn.disabled=false;
