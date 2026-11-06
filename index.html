@@ -84,6 +84,8 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .step.done{background:var(--ok-bg);border-color:transparent}
 .step.done h3{color:var(--ok)}
 .when{font:600 13px var(--body);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.regsoon{margin-left:8px;color:var(--muted);font-weight:600}
+.regbtn[hidden]{display:none}
 .regbtn{display:inline-block;margin-left:8px;background:var(--orange);color:var(--navy);font-weight:700;text-decoration:none;padding:6px 14px;border-radius:999px}
 .step .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
 .btn.up{margin:0;padding:5px 12px;font-size:13px;background:var(--orange);color:var(--navy);border-color:var(--orange);font-weight:700}
@@ -148,7 +150,7 @@ footer .wrap{padding-block:20px}
 
   <!-- PROYECTOS -->
   <section id="v-proyectos" role="tabpanel" aria-labelledby="t-proyectos" hidden>
-    <div class="note"><span>ⓘ</span><div><strong>¿Ya tienes tu proyecto?</strong> Regístralo una sola vez con el formulario. Aparecerá aquí cuando tus mentores lo revisen, y su etapa se actualiza sola con tu avance en Mi progreso. <a class="regbtn" href="https://docs.google.com/forms/d/e/1FAIpQLSedcmlf444D3q7om-tgAo1tIRy2l67rs3RuKkX-sNikRIWCkg/viewform?usp=header" target="_blank" rel="noopener">Registrar mi proyecto</a></div></div>
+    <div class="note"><span>ⓘ</span><div><strong>¿Ya tienes tu proyecto?</strong> Regístralo una sola vez con el formulario. Aparecerá aquí cuando tus mentores lo revisen, y su etapa se actualiza sola con tu avance en Mi progreso. <a class="regbtn" id="regBtn" href="#" target="_blank" rel="noopener" hidden>Registrar mi proyecto</a><span class="regsoon" id="regSoon">El formulario de registro se activará pronto.</span></div></div>
     <div class="chips" id="projFilter"></div>
     <div class="grid" id="projGrid"></div>
   </section>
@@ -238,6 +240,7 @@ async function loadProj(){
   if(!SYNC_URL)return;
   try{
     const j=await (await fetch(SYNC_URL+"?proyectos=1",{cache:"no-store"})).json();
+    if(j.form&&/^https:\/\/docs\.google\.com\/forms\//.test(j.form)){const b=$("#regBtn");b.href=j.form;b.hidden=false;$("#regSoon").hidden=true}
     PROJ=(j.proyectos||[]).map(x=>({n:String(x.n||"").trim(),t:String(x.t||"").trim(),st:STAGES.includes(x.st)?x.st:"Empatizar"})).filter(p=>p.n);
     renderProj();
   }catch(e){}
