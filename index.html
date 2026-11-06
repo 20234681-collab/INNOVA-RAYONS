@@ -171,7 +171,7 @@ footer .wrap{padding-block:20px}
     </div>
     <h2>Etapas</h2>
     <div class="steps" id="steps"></div>
-    <p class="upnote" id="upNote">Para avanzar: 1) escribe el nombre de tu proyecto (igual que en el formulario de registro), 2) sube la plantilla de la etapa con el botón <b>Subir</b> (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y 3) marca la casilla. Mentoría y MVP listo se marcan solo con el nombre del proyecto.</p>
+    <p class="upnote" id="upNote">Para avanzar: 1) escribe el nombre de tu proyecto (igual que en el formulario de registro), 2) sube la plantilla de cada etapa con el botón <b>Subir</b> (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y la etapa se marca sola. Mentoría y MVP listo no llevan plantilla: se marcan a mano con la casilla.</p>
     <input id="uplFile" type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg">
     <div class="upother"><button class="btn up" type="button" data-tpl="Otro" data-id="otro">Subir otro archivo</button> <span class="upst" id="upst-otro"></span></div>
     <button class="btn" id="reset" type="button">Reiniciar progreso</button>
@@ -252,11 +252,13 @@ let team="";try{team=localStorage.getItem("ir-equipo")||""}catch(e){}
 const nk=t=>String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
 const rd=k=>{try{return JSON.parse(localStorage.getItem(k+"::"+nk(team))||"{}")}catch(e){return {}}};
 let done=rd("ir-progreso"),sent=rd("ir-enviadas");
+const fix=()=>STEPS.forEach(s=>{if(s.tpl&&sent[s.id])done[s.id]=true});
+fix();
 function save(){try{localStorage.setItem("ir-progreso::"+nk(team),JSON.stringify(done))}catch(e){}}
 function saveSent(){try{localStorage.setItem("ir-enviadas::"+nk(team),JSON.stringify(sent))}catch(e){}}
-const lock=s=>!ready()||(s.tpl&&!sent[s.id]);
+const lock=s=>!ready()||!!s.tpl;
 function renderProg(){
-  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}${lock(s)?" locked":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""} ${lock(s)?"disabled":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p>${lock(s)&&!done[s.id]?`<p class="lockmsg">🔒 ${!ready()?"Primero escribe el nombre de tu proyecto.":"Sube tu plantilla para poder marcar esta etapa."}</p>`:""}</div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
+  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}${lock(s)?" locked":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""} ${lock(s)?"disabled":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p>${lock(s)&&!done[s.id]?`<p class="lockmsg">🔒 ${!ready()?"Primero escribe el nombre de tu proyecto.":"Sube tu plantilla y esta etapa se marca sola."}</p>`:""}</div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
   const n=STEPS.filter(s=>done[s.id]).length,pct=Math.round(n/STEPS.length*100);
   $("#ringPct").textContent=$("#navPct").textContent=pct+"%";
   $("#ringSub").textContent=`${n} de ${STEPS.length}`;
@@ -277,7 +279,7 @@ function sync(){
     .then(()=>{m.className="syncmsg ok";m.textContent="Avance enviado ✓"})
     .catch(()=>{m.className="syncmsg";m.textContent="No se pudo enviar. Revisa tu conexión."});
 }
-$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}done=rd("ir-progreso");sent=rd("ir-enviadas");renderProg();sync()};
+$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}done=rd("ir-progreso");sent=rd("ir-enviadas");fix();renderProg();sync()};
 $("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
 // ---- Subir plantilla (botón por etapa) ----
 let upCur=null;
@@ -298,12 +300,12 @@ $("#uplFile").onchange=async()=>{
     const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(f)});
     const r=await fetch(SYNC_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({tipo:"entrega",team,plantilla:tpl,nombre:f.name,data})});
     const j=await r.json();
-    if(j.ok){sent[id]=1;saveSent();renderProg();setSt(id,"Enviada ✓","ok")}
+    if(j.ok){sent[id]=1;saveSent();const st=STEPS.find(x=>x.id===id);if(st)done[id]=true;save();renderProg();sync();setSt(id,"Enviada ✓","ok")}
     else setSt(id,j.error||"No se pudo enviar.");
   }catch(x){setSt(id,"No se pudo confirmar el envío. Inténtalo otra vez.")}
   btn.disabled=false;
 };
-$("#reset").onclick=()=>{done={};save();renderProg();sync()};
+$("#reset").onclick=()=>{done={};sent={};save();saveSent();renderProg();sync()};
 
 function show(v){
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
