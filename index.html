@@ -93,7 +93,6 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .upst{font:600 12px var(--body);color:var(--muted)}
 .upst.ok{color:var(--ok)}
 .upnote{color:var(--muted);font-size:14px;margin:14px 0 8px}
-.upother{margin:6px 0 4px;display:flex;align-items:center;gap:10px}
 .empty{grid-column:1/-1;color:var(--muted);padding:18px 0}
 .teampick{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
 .teampick label{font:700 13px var(--body);color:var(--muted)}
@@ -177,7 +176,6 @@ footer .wrap{padding-block:20px}
     <div class="steps" id="steps"></div>
     <p class="upnote" id="upNote">Para avanzar: 1) elige tu proyecto en la lista (aparece cuando ya lo registraste y fue aprobado), 2) sube la plantilla de cada etapa con el botón <b>Subir</b> (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y la etapa se marca sola. Mentoría y MVP listo no llevan plantilla: se marcan a mano con la casilla.</p>
     <input id="uplFile" type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg">
-    <div class="upother"><button class="btn up" type="button" data-tpl="Otro" data-id="otro">Subir otro archivo</button> <span class="upst" id="upst-otro"></span></div>
     <button class="btn" id="reset" type="button">Reiniciar progreso</button>
   </section>
 
