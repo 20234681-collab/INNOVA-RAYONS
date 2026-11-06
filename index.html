@@ -97,6 +97,9 @@ td.d{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .empty{grid-column:1/-1;color:var(--muted);padding:18px 0}
 .teampick{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
 .teampick label{font:700 13px var(--body);color:var(--muted)}
+.noproj{margin:8px 0 0;font-size:13px;color:var(--muted)}
+.noproj a{color:var(--navy);font-weight:700}
+.teampick select{font:600 14px var(--body);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:inherit;min-width:240px;max-width:100%}
 .teampick input{font:600 14px var(--body);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:inherit;min-width:220px}
 .syncmsg{font:600 12px var(--body);color:var(--muted)}
 .syncmsg.ok{color:var(--ok)}
@@ -165,13 +168,14 @@ footer .wrap{padding-block:20px}
       <div>
         <div class="eyebrow">Tu ruta al pitch</div>
         <h2 style="margin:6px 0 8px" id="progMsg">Empieza por Empatizar</h2>
-        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda en este navegador y, si escribes el nombre de tu proyecto, también lo ven tus mentores.</p>
-        <div class="teampick"><label for="team">Nombre de mi proyecto</label><input id="team" type="text" maxlength="60" placeholder="Igual que en el formulario de registro" autocomplete="off"><span id="syncMsg" class="syncmsg"></span></div>
+        <p style="margin:0;color:var(--muted);max-width:60ch">Marca cada etapa cuando tu equipo la complete. La meta mínima para la presentación final del 21 de noviembre es tener un MVP y tu ficha de proyecto. Tu avance se guarda en este navegador y, si eliges tu proyecto, también lo ven tus mentores.</p>
+        <div class="teampick"><label for="team">Mi proyecto</label><select id="team"></select><span id="syncMsg" class="syncmsg"></span></div>
+        <p class="noproj">¿No aparece tu proyecto? Primero <a id="regHint" href="#" target="_blank" rel="noopener">regístralo con el formulario</a> y espera a que lo aprueben.</p>
       </div>
     </div>
     <h2>Etapas</h2>
     <div class="steps" id="steps"></div>
-    <p class="upnote" id="upNote">Para avanzar: 1) escribe el nombre de tu proyecto (igual que en el formulario de registro), 2) sube la plantilla de cada etapa con el botón <b>Subir</b> (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y la etapa se marca sola. Mentoría y MVP listo no llevan plantilla: se marcan a mano con la casilla.</p>
+    <p class="upnote" id="upNote">Para avanzar: 1) elige tu proyecto en la lista (aparece cuando ya lo registraste y fue aprobado), 2) sube la plantilla de cada etapa con el botón <b>Subir</b> (Word, PDF, Excel, PowerPoint o imagen, máximo 8 MB) y la etapa se marca sola. Mentoría y MVP listo no llevan plantilla: se marcan a mano con la casilla.</p>
     <input id="uplFile" type="file" hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg">
     <div class="upother"><button class="btn up" type="button" data-tpl="Otro" data-id="otro">Subir otro archivo</button> <span class="upst" id="upst-otro"></span></div>
     <button class="btn" id="reset" type="button">Reiniciar progreso</button>
@@ -241,6 +245,8 @@ async function loadProj(){
   try{
     const j=await (await fetch(SYNC_URL+"?proyectos=1",{cache:"no-store"})).json();
     if(j.form&&/^https:\/\/docs\.google\.com\/forms\//.test(j.form)){const b=$("#regBtn");b.href=j.form;b.hidden=false;$("#regSoon").hidden=true}
+    fillTeams((j.registrados||[]).map(x=>String(x).trim()).filter(Boolean));
+    if(j.form&&/^https:\/\/docs\.google\.com\/forms\//.test(j.form))$("#regHint").href=j.form;
     PROJ=(j.proyectos||[]).map(x=>({n:String(x.n||"").trim(),t:String(x.t||"").trim(),st:STAGES.includes(x.st)?x.st:"Empatizar"})).filter(p=>p.n);
     renderProj();
   }catch(e){}
@@ -258,7 +264,7 @@ function save(){try{localStorage.setItem("ir-progreso::"+nk(team),JSON.stringify
 function saveSent(){try{localStorage.setItem("ir-enviadas::"+nk(team),JSON.stringify(sent))}catch(e){}}
 const lock=s=>!ready()||!!s.tpl;
 function renderProg(){
-  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}${lock(s)?" locked":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""} ${lock(s)?"disabled":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p>${lock(s)&&!done[s.id]?`<p class="lockmsg">🔒 ${!ready()?"Primero escribe el nombre de tu proyecto.":"Sube tu plantilla y esta etapa se marca sola."}</p>`:""}</div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
+  $("#steps").innerHTML=STEPS.map((s,i)=>`<label class="step${done[s.id]?" done":""}${lock(s)?" locked":""}" for="st${i}"><input type="checkbox" id="st${i}" data-id="${esc(s.id)}" ${done[s.id]?"checked":""} ${lock(s)?"disabled":""}><div><h3>${esc(s.t)}</h3><p>${esc(s.p)}</p>${lock(s)&&!done[s.id]?`<p class="lockmsg">🔒 ${!ready()?"Primero elige tu proyecto.":"Sube tu plantilla y esta etapa se marca sola."}</p>`:""}</div><div class="right"><span class="when">${esc(s.w)}</span>${s.tpl?`<button type="button" class="btn up" data-tpl="${esc(s.tpl)}" data-id="${esc(s.id)}">${sent[s.id]?"Reenviar":"Subir"} · ${esc(s.tpl)}</button><span class="upst${sent[s.id]?" ok":""}" id="upst-${esc(s.id)}">${sent[s.id]?"Enviada ✓":""}</span>`:""}</div></label>`).join("");
   const n=STEPS.filter(s=>done[s.id]).length,pct=Math.round(n/STEPS.length*100);
   $("#ringPct").textContent=$("#navPct").textContent=pct+"%";
   $("#ringSub").textContent=`${n} de ${STEPS.length}`;
@@ -269,7 +275,21 @@ function renderProg(){
 // ---- Envío del avance a la hoja de Google (ver apps-script.gs) ----
 const SYNC_URL="https://script.google.com/macros/s/AKfycbwdk9uS5jyWjkUd5Mf5-j7UwJ9_yUNlBLnf2owG-d3eaNSuGqp9_Xh4-osIr2FKKVaOVw/exec";   // pega aquí la URL de tu Apps Script (termina en /exec)
 const ready=()=>!!team;
-$("#team").value=team;
+function fillTeams(list){
+  const names=[...list];if(team&&!names.some(n=>nk(n)===nk(team)))names.unshift(team);
+  $("#team").innerHTML='<option value="">— Elige tu proyecto —</option>'+names.map(n=>`<option${nk(n)===nk(team)?" selected":""}>${esc(n)}</option>`).join("");
+}
+fillTeams([]);
+async function pull(){
+  if(!SYNC_URL||!team)return;
+  const t=team;
+  try{
+    const j=await (await fetch(SYNC_URL+"?avance="+encodeURIComponent(t),{cache:"no-store"})).json();
+    if(t!==team)return;
+    Object.keys(j.steps||{}).forEach(id=>{if(STEPS.some(s=>s.id===id))done[id]=true});
+    save();renderProg();
+  }catch(e){}
+}
 function sync(){
   const m=$("#syncMsg");
   if(!SYNC_URL||!team){m.textContent="";return}
@@ -279,7 +299,7 @@ function sync(){
     .then(()=>{m.className="syncmsg ok";m.textContent="Avance enviado ✓"})
     .catch(()=>{m.className="syncmsg";m.textContent="No se pudo enviar. Revisa tu conexión."});
 }
-$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}done=rd("ir-progreso");sent=rd("ir-enviadas");fix();renderProg();sync()};
+$("#team").onchange=e=>{team=e.target.value.trim().replace(/\s+/g," ");e.target.value=team;try{localStorage.setItem("ir-equipo",team)}catch(x){}done=rd("ir-progreso");sent=rd("ir-enviadas");fix();renderProg();pull().finally(sync)};
 $("#steps").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;done[id]=e.target.checked;save();renderProg();sync()});
 // ---- Subir plantilla (botón por etapa) ----
 let upCur=null;
@@ -288,7 +308,7 @@ document.addEventListener("click",e=>{
   const b=e.target.closest(".btn.up");if(!b)return;
   e.preventDefault();e.stopPropagation();
   if(!SYNC_URL)return setSt(b.dataset.id,"El envío aún no está activado.");
-  if(!ready()){setSt(b.dataset.id,"Escribe primero el nombre de tu proyecto.");$("#team").focus();return}
+  if(!ready()){setSt(b.dataset.id,"Elige primero tu proyecto en la lista.");$("#team").focus();return}
   upCur={tpl:b.dataset.tpl,id:b.dataset.id,btn:b};$("#uplFile").value="";$("#uplFile").click();
 },true);
 $("#uplFile").onchange=async()=>{
@@ -314,7 +334,7 @@ function show(v){
   try{localStorage.setItem("ir-tab",v)}catch(e){}
 }
 document.querySelector("nav").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.v)};
-renderRes();renderProj();renderProg();loadProj();
+renderRes();renderProj();renderProg();loadProj();pull();
 let start="recursos";
 const h=location.hash.slice(1);
 if(HERO[h])start=h;else{try{const t=localStorage.getItem("ir-tab");if(HERO[t])start=t}catch(e){}}
